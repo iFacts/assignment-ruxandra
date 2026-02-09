@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="BusinessEntities/SalesTaxCalculator.BusinessEntities.csproj" Id="e7415f85-c1f1-4e56-9bfa-9492fb828b3f" />
+  <Project Path="BusinessLogic/SalesTaxCalculator.BusinessLogic.csproj" />
+  <Project Path="Tests/Tests.csproj" />
+  <Project Path="WebApi/SalesTaxCalculator.WebApi.csproj" Id="f1e6f1e2-f656-4cc6-89b4-48a76393a375" />
+</Solution>

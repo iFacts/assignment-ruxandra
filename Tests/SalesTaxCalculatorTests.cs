@@ -1,11 +1,49 @@
-﻿using System.Linq;
-using NUnit.Framework;
+﻿using SalesTaxCalculator.BusinessEntities.Enums;
+using SalesTaxCalculator.BusinessEntities.Models;
+using SalesTaxCalculator.BusinessEntities.Settings;
+using SalesTaxCalculator.BusinessLogic.Interfaces;
+using SalesTaxCalculator.BusinessLogic.Logic.Rules;
 
 namespace Tests
 {
     [TestFixture]
     public class SalesTaxCalculatorTests
     {
+        private SalesTaxCalculator.BusinessLogic.Logic.SalesTaxCalculator? SalesTaxCalculator { get; set; }
+
+        [SetUp]
+        public void Setup()
+        {
+            var salesTaxCalculatorSettings = new SalesTaxCalculatorSettings
+            {
+                NumberOfDecimalPlaces = 2
+            };
+
+            var saleTaxSettings = new SaleTaxRuleSettings
+            {
+                TaxAmount = 0.15m,
+                ExcludedCategories = new List<Category>
+                {
+                    Category.Food,
+                    Category.Magazines,
+                    Category.Electronics
+                }
+            };
+
+            var importedTaxSettings = new ImportedTaxRuleSettings
+            {
+                TaxAmount = 0.10m
+            };
+
+            var taxRules = new List<ITaxRule>
+            {
+                new SaleTaxRule(saleTaxSettings),
+                new ImportedTaxRule(importedTaxSettings)
+            };
+
+            SalesTaxCalculator = new SalesTaxCalculator.BusinessLogic.Logic.SalesTaxCalculator(taxRules, salesTaxCalculatorSettings);
+        }
+
         [Test]
         public void FirstExample()
         {
@@ -26,7 +64,7 @@ namespace Tests
         {
             var receiptDetails = SalesTaxCalculator.Process(
                 new Item("Imported box of chocolates", 10m, Category.Food, true),
-                new Item("Imported bottle of perfume", 47.50m, true));
+                new Item("Imported bottle of perfume", 47.50m, isImported: true));
             var receiptItems = receiptDetails.ReceiptItems.ToList();
             Assert.That(receiptItems[0].PriceIncludingSalesTax, Is.EqualTo(11.00m));
             Assert.That(receiptItems[1].PriceIncludingSalesTax, Is.EqualTo(59.38m));
@@ -38,10 +76,10 @@ namespace Tests
         public void ThirdExample()
         {
             var receiptDetails = SalesTaxCalculator.Process(
-                new Item("Imported bottle of perfume", 27.99m, true),
+                new Item("Imported bottle of perfume", 27.99m, isImported: true),
                 new Item("Bottle of perfume", 18.99m),
                 new Item("USB drive", 9.75m, Category.Electronics),
-                new Item("Box of imported chocolates", 11.25m, Category.Food, true));
+                new Item("Box of imported chocolates", 11.25m, Category.Food, isImported: true));
             var receiptItems = receiptDetails.ReceiptItems.ToList();
             Assert.That(receiptItems[0].PriceIncludingSalesTax, Is.EqualTo(34.99m));
             Assert.That(receiptItems[1].PriceIncludingSalesTax, Is.EqualTo(21.84m));
